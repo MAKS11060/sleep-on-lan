@@ -14,11 +14,9 @@ export const suspend = (
       },
     })
 
-    console.log(
-      'result',
-      symbols.SetSuspendState(hibernate, force, disableWakeEvent)
-    )
-
+    const c = symbols.SetSuspendState(hibernate, force, disableWakeEvent)
+    console.log('result', c)
+    return c
   }
 }
 

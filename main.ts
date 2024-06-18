@@ -1,7 +1,7 @@
 #!/usr/bin/env -S deno run -A --watch
 
 import {debounce} from 'jsr:@std/async'
-import { suspend } from "./sys-suspend.ts";
+import {suspend} from "./src/sys-suspend.ts"
 
 /* WOL Pocket (102 bytes)
 1. ffffffffffff // Constant
@@ -73,23 +73,33 @@ const listenWOL = (port: number = 9) => {
   })
 }
 
-// for await (const data of listenWOL()) {
-//   console.log(data)
-//   break
-// }
+const debounceTime = 1000 * 60
+const sleepDelay = 1000 * 30
 
-const debounceTime = 1000 * 60 // * 3
-
-let last = 0
+let lastReceivedTime = 0
+let timeout: number
+let waitForSleet = false
 
 Array.fromAsync(
   listenWOL(),
   debounce((data) => {
     if (data.currentDevice) {
-      if (Date.now() - last >= debounceTime) {
-        last = Date.now() // set now
-        console.log('fire')
-        suspend(false, true, false)
+      if (Date.now() - lastReceivedTime >= debounceTime) {
+        lastReceivedTime = Date.now() // set now
+        clearTimeout(timeout) // reset
+        console.log(`wait for sleep in ${sleepDelay / 1000}s`)
+        if (!waitForSleet) {
+          waitForSleet = true
+          timeout = setTimeout(() => {
+            waitForSleet = false
+            // console.log('sleep')
+            suspend()
+          }, sleepDelay)
+        }
+      } else if (waitForSleet) {
+        waitForSleet = false
+        console.log(`Sleep canceled. Wait ${debounceTime/1000}s`)
+        clearTimeout(timeout)
       }
     }
   }, 200)

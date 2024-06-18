@@ -2,7 +2,7 @@
   "lock": false,
   "tasks": {
     "start": "deno run --allow-sys=networkInterfaces --allow-net ./main.ts",
-    "build": "deno compile --allow-sys=networkInterfaces --allow-net --output build/sol main.ts"
+    "build": "deno compile --allow-sys=networkInterfaces --allow-net --output build/sol --target=x86_64-pc-windows-msvc main.ts"
   },
   "unstable": [
     "ffi",
