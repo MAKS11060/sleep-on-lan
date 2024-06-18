@@ -1,0 +1,11 @@
+{
+  "lock": false,
+  "tasks": {
+    "start": "deno run --allow-sys=networkInterfaces --allow-net ./main.ts",
+    "build": "deno compile --allow-sys=networkInterfaces --allow-net --output build/sol main.ts"
+  },
+  "unstable": [
+    "ffi",
+    "net"
+  ]
+}
