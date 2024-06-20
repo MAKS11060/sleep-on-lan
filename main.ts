@@ -78,7 +78,7 @@ const sleepDelay = 1000 * 30
 
 let lastReceivedTime = 0
 let timeout: number
-let waitForSleet = false
+let waitForSleep = false
 
 Array.fromAsync(
   listenWOL(),
@@ -88,16 +88,16 @@ Array.fromAsync(
         lastReceivedTime = Date.now() // set now
         clearTimeout(timeout) // reset
         console.log(`wait for sleep in ${sleepDelay / 1000}s`)
-        if (!waitForSleet) {
-          waitForSleet = true
+        if (!waitForSleep) {
+          waitForSleep = true
           timeout = setTimeout(() => {
-            waitForSleet = false
+            waitForSleep = false
             // console.log('sleep')
             suspend()
           }, sleepDelay)
         }
-      } else if (waitForSleet) {
-        waitForSleet = false
+      } else if (waitForSleep) {
+        waitForSleep = false
         console.log(`Sleep canceled. Wait ${debounceTime/1000}s`)
         clearTimeout(timeout)
       }
