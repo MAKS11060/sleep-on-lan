@@ -9,6 +9,8 @@ use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tokio::time::{sleep, Duration};
 
+use windows::Win32::System::Power::SetSuspendState;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let mac_list: Vec<MacAddress> = MacAddressIterator::new()?.collect();
@@ -69,6 +71,7 @@ async fn main() -> Result<()> {
                 let mut wait = t.lock().await;
                 *wait = false;
                 println!("sleep");
+                // suspend();
             }));
         } else {
             if let Some(timeout) = timeout.take() {
@@ -79,5 +82,11 @@ async fn main() -> Result<()> {
         }
 
         println!("wait status: {}", wait);
+    }
+}
+
+fn suspend() {
+    unsafe {
+        SetSuspendState(false, true, false);
     }
 }

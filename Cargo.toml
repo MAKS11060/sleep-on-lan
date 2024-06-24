@@ -8,4 +8,12 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.86"
 mac_address = "1.1.7"
-tokio = { version = "1.38.0", features = ["full"] }
+tokio = { version = "1.38.0", features = [
+  "rt",
+  "rt-multi-thread",
+  "net",
+  "time",
+  "macros",
+  "sync",
+] }
+windows = { version = "0.57.0", features = ["Win32_System_Power"] }
