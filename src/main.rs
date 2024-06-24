@@ -1,8 +1,8 @@
-use std::sync::Arc;
-use std::time::Instant;
-
 use anyhow::Result;
 use mac_address::{MacAddress, MacAddressIterator};
+
+use std::sync::Arc;
+use std::time::Instant;
 
 use tokio::net::UdpSocket;
 use tokio::sync::Mutex;
@@ -14,17 +14,12 @@ async fn main() -> Result<()> {
     let mac_list: Vec<MacAddress> = MacAddressIterator::new()?.collect();
 
     let listener = UdpSocket::bind("0.0.0.0:9").await?;
+    let received_debounce = 200;
+    let sleep_delay = Duration::from_secs(3);
+    let wait_for_sleep = Arc::new(Mutex::new(false));
+
     let mut buf = [0; 102];
     let mut last_received_time = Instant::now();
-    let received_debounce = 200;
-
-    // let mut handle: Option<thread::JoinHandle<()>> = None;
-    // let mut is_wait_sleep = false;
-
-    let sleep_delay = Duration::from_secs(3);
-
-    // let mut wait_for_sleep = Arc::new(Amo);
-    let mut wait_for_sleep = Arc::new(Mutex::new(false));
     let mut timeout: Option<JoinHandle<()>> = None;
 
     loop {
@@ -39,34 +34,28 @@ async fn main() -> Result<()> {
             continue;
         }
 
-        let mut is_current_device = false;
-        for i in (6..byte_amount).step_by(6) {
-            is_current_device = mac_list
-                .iter()
-                .find(|&mac| mac.bytes() == &buf[i..i + 6])
-                .is_some();
-            if !is_current_device {
-                break;
-            }
-        }
+        let is_current_device = (6..byte_amount)
+            .step_by(6)
+            .all(|i| mac_list.iter().any(|mac| mac.bytes() == &buf[i..i + 6]));
 
         if !is_current_device {
             println!("Missed device");
             continue;
         }
-
-        if last_received_time.elapsed().as_millis() >= received_debounce {
-            last_received_time = Instant::now();
-        } else {
-            continue;
-        }
-
         // println!("Device: {is_current_device}");
 
+        match last_received_time.elapsed().as_millis() >= received_debounce {
+            true => last_received_time = Instant::now(),
+            false => continue,
+        }
+
         // ====================================
-        // 1. wait = false
-        //    create timeout, wait = true
-        // 2. wait = true
+        // 1. wait == false
+        //    wait = true
+        //    create timeout,
+        //      await => wait = false
+        //
+        // 2. wait == true
         //    timeout.abort()
         //    wait = false
 
@@ -84,109 +73,11 @@ async fn main() -> Result<()> {
         } else {
             if let Some(timeout) = timeout.take() {
                 timeout.abort();
-                println!("abort timeout");
                 *wait = false;
+                println!("abort timeout");
             }
         }
 
         println!("wait status: {}", wait);
-
-        // let mut flag = state.lock().await;
-        // if *flag == false {
-        //     println!("wait for sleep");
-        //     timeout = Some(tokio::spawn(async move {
-        //         sleep(sleep_delay).await;
-        //         // wait_for_sleep = false;
-        //         // let mut a = state.lock().await;
-        //         // *a = false;
-
-        //         println!("sleep");
-        //     }));
-        // } else if *flag {
-        //     *flag = false;
-        //     println!("Sleep canceled");
-        // }
-
-        // ====================================
-        // let mut a = wait_for_sleep.lock().await;
-
-        // if !*a {
-        //     *a = true;
-        //     let sleep_delay = sleep_delay;
-        //     timeout = Some(tokio::spawn(async move {
-        //         sleep(sleep_delay).await;
-        //         // wait_for_sleep = false;
-        //         let wait_for_sleep = wait_for_sleep.clone();
-        //         // let mut val = wait_for_sleep.lock().await;
-        //         //  *val = false;
-        //         // *a  = false;
-        //         println!("sleep");
-        //     }));
-        // } else if *a {
-        //     *a = false;
-        //     println!("Sleep canceled");
-        // }
-
-        // =============================
-        // let (tx, mut rx) = mpsc::channel(1);
-        // let mut handle: Option<tokio::task::JoinHandle<()>> = None;
-
-        // // Clear the timeout
-        // if let Some(handle) = handle.take() {
-        //     tx.send(()).await.unwrap();
-        //     handle.await.unwrap();
-        // }
-
-        // // Set a new timeout
-        // println!("spawn");
-        // handle = Some(tokio::spawn(async move {
-        //     sleep(Duration::from_millis(2000)).await;
-        //     if rx.try_recv().is_ok() {
-        //         println!("Timeout cancelled");
-        //         return;
-        //     }
-        //     // println!("ok");
-        //     println!("is_wait_sleep {is_wait_sleep}");
-
-        // }));
-        // println!("end");
-        // if !is_wait_sleep {
-        //     is_wait_sleep = true;
-        //     println!("start wait");
-        // } else {
-        //     is_wait_sleep = false;
-        //     println!("stop wait");
-        // }
-        //----------------------------------
-
-        // let (tx, rx) = mpsc::channel();
-
-        // // Отменяем таймаут
-        // if let Some(handle) = handle.take() {
-        //     tx.send(()).unwrap();
-        //     handle.join().unwrap();
-        // }
-
-        // // Устанавливаем новый таймаут
-        // handle = Some(thread::spawn(move || {
-        //     thread::sleep(Duration::from_millis(1000));
-        //     if rx.try_recv().is_ok() {
-        //         println!("Таймаут отменен");
-        //         return;
-        //     }
-        //     println!("ok");
-        // }));
-
-        // let sleep_delay = 1000 * 60;
-        // let last_received_time = 0;
-        // let timeout = 0;
-
-        // if !is_wait_sleep {
-        //     is_wait_sleep = true;
-        //     println!("wait for sleep");
-        // } else {
-        //     is_wait_sleep = false;
-        //     println!("cancel");
-        // }
     }
 }
