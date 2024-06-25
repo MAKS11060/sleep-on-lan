@@ -1,7 +1,7 @@
 #!/usr/bin/env -S deno run -A --watch
 
 import {debounce} from 'jsr:@std/async'
-import {suspend} from "./src/sys-suspend.ts"
+import {suspend} from './src/sys-suspend.ts'
 
 /* WOL Pocket (102 bytes)
 1. ffffffffffff // Constant
@@ -98,7 +98,7 @@ Array.fromAsync(
         }
       } else if (waitForSleep) {
         waitForSleep = false
-        console.log(`Sleep canceled. Wait ${debounceTime/1000}s`)
+        console.log(`Sleep canceled. Wait ${debounceTime / 1000}s`)
         clearTimeout(timeout)
       }
     }
