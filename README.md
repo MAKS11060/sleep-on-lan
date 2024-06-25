@@ -3,14 +3,14 @@
 
 ## Usage
 
-Install [Deno](https://deno.com)
 
 ```sh
-deno task start
+cargo build -r
 ```
 
 ## Todo:
-- [ ] Write doc
+- [x] Rewrite on rust
+- [ ] Add `windows service`
 - [ ] Add release workflow
 - [ ] Add installer
-- [ ] *Rewrite on rust
+- [ ] Write doc
