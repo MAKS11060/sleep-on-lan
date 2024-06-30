@@ -18,3 +18,16 @@ tokio = { version = "1.38.0", features = [
 ] }
 windows = { version = "0.57.0", features = ["Win32_System_Power"] }
 windows-service = "0.7.0"
+windows-sys = "0.52.0"
+
+[[bin]]
+name = "main"
+path = "./src/main.rs"
+
+[[bin]]
+name = "install_service"
+path = "./src/install_service/main.rs"
+
+[[bin]]
+name = "rm_service"
+path = "./src/rm_service/main.rs"

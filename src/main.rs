@@ -1,8 +1,9 @@
 use mac_address::{MacAddress, MacAddressIterator};
-use windows_service::{define_windows_service, service_dispatcher};
+use windows_service::service::{ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus, ServiceType};
+use windows_service::service_control_handler::{self, ServiceControlHandlerResult};
 
 use std::ffi::OsString;
-use std::sync::Arc;
+use std::sync::{mpsc, Arc};
 use std::time::Instant;
 
 use tokio::net::UdpSocket;
@@ -10,22 +11,23 @@ use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tokio::time::{sleep, Duration};
 
+use windows_service::{define_windows_service, service_dispatcher};
+
 #[cfg(not(debug_assertions))]
 use windows::Win32::System::Power::SetSuspendState;
 
-
+// fn main() {
+//     run_tokio();
+// }
 fn main() -> windows_service::Result<()> {
     run()
 }
-
 
 pub fn run() -> windows_service::Result<()> {
     service_dispatcher::start("sleep-on-lan", ffi_service_main)
 }
 
-
 define_windows_service!(ffi_service_main, service_main);
-
 
 pub fn service_main(_arguments: Vec<OsString>) {
     if let Err(e) = run_service() {
@@ -33,8 +35,55 @@ pub fn service_main(_arguments: Vec<OsString>) {
     }
 }
 
-
 pub fn run_service() -> anyhow::Result<()> {
+    // Create a channel to be able to poll a stop event from the service worker loop.
+    let (shutdown_tx, shutdown_rx) = mpsc::channel();
+
+    // Define system service event handler that will be receiving service events.
+    let event_handler = move |control_event| -> ServiceControlHandlerResult {
+        match control_event {
+            // Notifies a service to report its current status information to the service
+            // control manager. Always return NoError even if not implemented.
+            ServiceControl::Interrogate => ServiceControlHandlerResult::NoError,
+
+            // Handle stop
+            ServiceControl::Stop => {
+                shutdown_tx.send(()).unwrap();
+
+                ServiceControlHandlerResult::NoError
+            }
+
+            // treat the UserEvent as a stop request
+            ServiceControl::UserEvent(code) => {
+                if code.to_raw() == 130 {
+                    shutdown_tx.send(()).unwrap();
+                }
+                ServiceControlHandlerResult::NoError
+            }
+
+            _ => ServiceControlHandlerResult::NotImplemented,
+        }
+    };
+
+    // Register system service event handler.
+    // The returned status handle should be used to report service status changes to the system.
+    let status_handle = service_control_handler::register("sleep-on-lan", event_handler)?;
+
+    // Tell the system that service is running
+    status_handle.set_service_status(ServiceStatus {
+        service_type: ServiceType::OWN_PROCESS,
+        current_state: ServiceState::Running,
+        controls_accepted: ServiceControlAccept::STOP,
+        exit_code: ServiceExitCode::Win32(0),
+        checkpoint: 0,
+        wait_hint: Duration::default(),
+        process_id: None,
+    })?;
+
+    run_tokio()
+}
+
+pub fn run_tokio() -> anyhow::Result<()> {
     let rt = tokio::runtime::Runtime::new()?;
     rt.block_on(async {
         let mac_list: Vec<MacAddress> = MacAddressIterator::new()?.collect();
@@ -110,13 +159,13 @@ pub fn run_service() -> anyhow::Result<()> {
             println!("wait status: {}", wait);
         }
     })
-}
 
+}
 
 #[cfg(not(debug_assertions))]
 fn suspend() {
     unsafe {
-        // SetSuspendState(false, true, false);
         println!("Suspend state set");
+        // SetSuspendState(false, true, false);
     }
 }
