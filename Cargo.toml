@@ -1,5 +1,5 @@
 [package]
-name = "sleep-on-lan-rs"
+name = "sleep-on-lan"
 version = "0.1.0"
 edition = "2021"
 
@@ -17,3 +17,4 @@ tokio = { version = "1.38.0", features = [
   "sync",
 ] }
 windows = { version = "0.57.0", features = ["Win32_System_Power"] }
+windows-service = "0.7.0"
