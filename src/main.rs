@@ -1,5 +1,7 @@
 use mac_address::{MacAddress, MacAddressIterator};
-use windows_service::service::{ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus, ServiceType};
+use windows_service::service::{
+    ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus, ServiceType,
+};
 use windows_service::service_control_handler::{self, ServiceControlHandlerResult};
 
 use std::ffi::OsString;
@@ -159,7 +161,6 @@ pub fn run_tokio() -> anyhow::Result<()> {
             println!("wait status: {}", wait);
         }
     })
-
 }
 
 #[cfg(not(debug_assertions))]

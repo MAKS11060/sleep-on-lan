@@ -9,6 +9,8 @@ pub fn install_service() -> windows_service::Result<()> {
         service_manager::{ServiceManager, ServiceManagerAccess},
     };
 
+    const SERVICE_NAME: &str = "sleep-on-lan";
+
     let manager_access = ServiceManagerAccess::CONNECT | ServiceManagerAccess::CREATE_SERVICE;
     let service_manager = ServiceManager::local_computer(None::<&str>, manager_access)?;
 
@@ -17,11 +19,11 @@ pub fn install_service() -> windows_service::Result<()> {
     // that implements windows service.
     let service_binary_path = ::std::env::current_exe()
         .unwrap()
-        .with_file_name("main.exe");
-    println!("{}", service_binary_path.to_str().unwrap());
+        .with_file_name("sleep-on-lan.exe");
+    println!("Install target: {}", service_binary_path.to_str().unwrap());
 
     let service_info = ServiceInfo {
-        name: OsString::from("sleep-on-lan"),
+        name: OsString::from(SERVICE_NAME),
         display_name: OsString::from("sleep-on-lan service"),
         service_type: ServiceType::OWN_PROCESS,
         start_type: ServiceStartType::OnDemand,
