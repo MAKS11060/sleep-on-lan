@@ -21,7 +21,7 @@ windows-service = "0.7.0"
 windows-sys = "0.52.0"
 
 [[bin]]
-name = "main"
+name = "sleep-on-lan"
 path = "./src/main.rs"
 
 [[bin]]
