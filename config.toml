@@ -1,5 +1,0 @@
-# https://doc.rust-lang.org/cargo/reference/config.html
-
-[build]
-target = "x86_64-pc-windows-msvc"
-target-dir = "target"
