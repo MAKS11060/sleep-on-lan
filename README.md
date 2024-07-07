@@ -11,11 +11,13 @@
   </a>
 </div>
 
-## Usage
+## Install
 
-
-```sh
-cargo build -r
+1. Install service
+```ps
+cargo run --bin service i
+# or remove
+cargo run --bin service r
 ```
 
 ## Todo:
