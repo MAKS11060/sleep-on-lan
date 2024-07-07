@@ -20,7 +20,6 @@ cargo build -r
 
 ## Todo:
 - [x] Rewrite on rust
-- [ ] Add `windows service`
-- [ ] Add release workflow
+- [x] Add `windows service`
 - [ ] Add installer
 - [ ] Write doc
