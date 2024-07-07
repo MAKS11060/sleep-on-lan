@@ -2,7 +2,6 @@ use anyhow::Ok;
 use mac_address::{MacAddress, MacAddressIterator};
 
 use std::ffi::OsString;
-use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -22,6 +21,11 @@ use windows::Win32::System::Power::SetSuspendState;
 
 const SERVICE_NAME: &str = "sleep-on-lan";
 
+// #[tokio::main]
+// async fn main() {
+//     server().await;
+// }
+
 fn main() -> windows_service::Result<()> {
     run()
 }
@@ -39,8 +43,6 @@ fn service_main(_arguments: Vec<OsString>) {
 }
 
 fn run_service() -> anyhow::Result<()> {
-    let running = Arc::new(AtomicBool::new(true));
-    let running_clone = running.clone();
     let notify = Arc::new(Notify::new());
     let notify_clone = notify.clone();
 
@@ -70,7 +72,7 @@ fn run_service() -> anyhow::Result<()> {
 
     // Register system service event handler.
     // The returned status handle should be used to report service status changes to the system.
-    let status_handle = service_control_handler::register("sleep-on-lan", event_handler)?;
+    let status_handle = service_control_handler::register(SERVICE_NAME, event_handler)?;
 
     // Tell the system that service is running
     status_handle.set_service_status(ServiceStatus {
@@ -87,9 +89,6 @@ fn run_service() -> anyhow::Result<()> {
     rt.block_on(async {
         let server_handle = tokio::spawn(server());
 
-        // while running.load(std::sync::atomic::Ordering::SeqCst) {
-        //     sleep(Duration::from_secs(1)).await;
-        // }
         notify_clone.notified().await;
 
         server_handle.abort();
@@ -163,8 +162,8 @@ async fn server() -> anyhow::Result<()> {
                 // println!("abort timeout");
             }
         }
-
         println!("wait status: {}", wait);
+        // reqwest::get("http://localhost:80/recv").await?.text().await?;
     }
 }
 
