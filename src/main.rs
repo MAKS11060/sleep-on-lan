@@ -61,11 +61,10 @@ fn run_service() -> anyhow::Result<()> {
             }
 
             // treat the UserEvent as a stop request
-            ServiceControl::UserEvent(code) => {
-                // if code.to_raw() == 130 {}
-                ServiceControlHandlerResult::NoError
-            }
-
+            // ServiceControl::UserEvent(code) => {
+            //     // if code.to_raw() == 130 {}
+            //     ServiceControlHandlerResult::NoError
+            // }
             _ => ServiceControlHandlerResult::NotImplemented,
         }
     };
@@ -112,7 +111,7 @@ async fn server() -> anyhow::Result<()> {
 
     let listener = UdpSocket::bind("0.0.0.0:9").await?;
     let received_debounce = 200;
-    let sleep_delay = Duration::from_secs(3);
+    let sleep_delay = Duration::from_secs(5);
     let wait_for_sleep = Arc::new(Mutex::new(false));
 
     let mut buf = [0; 102];
@@ -133,7 +132,6 @@ async fn server() -> anyhow::Result<()> {
         let is_current_device = (6..byte_amount)
             .step_by(6)
             .all(|i| mac_list.iter().any(|mac| mac.bytes() == &buf[i..i + 6]));
-
         if !is_current_device {
             // println!("Missed device");
             continue;
@@ -148,8 +146,9 @@ async fn server() -> anyhow::Result<()> {
         if !*wait {
             *wait = true;
             let t = Arc::clone(&wait_for_sleep);
-            // println!("start wait");
             timeout = Some(tokio::spawn(async move {
+                #[cfg(debug_assertions)]
+                println!("wait");
                 sleep(sleep_delay).await;
                 let mut wait = t.lock().await;
                 *wait = false;
@@ -159,11 +158,12 @@ async fn server() -> anyhow::Result<()> {
             if let Some(timeout) = timeout.take() {
                 timeout.abort();
                 *wait = false;
-                // println!("abort timeout");
+                #[cfg(debug_assertions)]
+                println!("abort timeout");
             }
         }
-        println!("wait status: {}", wait);
-        // reqwest::get("http://localhost:80/recv").await?.text().await?;
+
+        // println!("wait status: {}", wait);
     }
 }
 
