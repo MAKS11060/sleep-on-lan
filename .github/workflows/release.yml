@@ -1,8 +1,11 @@
-name: CI
+name: Release
 
 on:
+  # release:
+  #   types: [published]
   push:
-    branches: [main]
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build:
@@ -26,7 +29,12 @@ jobs:
           # key: cargo-${{ hashFiles('Cargo.toml') }}
 
       - name: Build
-        run: cargo build
+        run: cargo build -r
 
       - name: Test
-        run: cargo test
+        run: cargo test -r
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/release/*.exe
