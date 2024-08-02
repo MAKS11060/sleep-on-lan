@@ -22,10 +22,14 @@ fn main() -> windows_service::Result<()> {
 
 pub fn install_service() -> windows_service::Result<()> {
     use std::ffi::OsString;
-    use windows_service::{
-        service::{ServiceAccess, ServiceErrorControl, ServiceInfo, ServiceStartType, ServiceType},
-        service_manager::{ServiceManager, ServiceManagerAccess},
-    };
+
+    use windows_service::service::ServiceAccess;
+    use windows_service::service::ServiceErrorControl;
+    use windows_service::service::ServiceInfo;
+    use windows_service::service::ServiceStartType;
+    use windows_service::service::ServiceType;
+    use windows_service::service_manager::ServiceManager;
+    use windows_service::service_manager::ServiceManagerAccess;
 
     let manager_access = ServiceManagerAccess::CONNECT | ServiceManagerAccess::CREATE_SERVICE;
     let service_manager = ServiceManager::local_computer(None::<&str>, manager_access)?;
@@ -59,11 +63,13 @@ pub fn install_service() -> windows_service::Result<()> {
 
 pub fn remove_service() -> windows_service::Result<()> {
     use std::thread::sleep;
-    use std::time::{Duration, Instant};
-    use windows_service::{
-        service::{ServiceAccess, ServiceState},
-        service_manager::{ServiceManager, ServiceManagerAccess},
-    };
+    use std::time::Duration;
+    use std::time::Instant;
+
+    use windows_service::service::ServiceAccess;
+    use windows_service::service::ServiceState;
+    use windows_service::service_manager::ServiceManager;
+    use windows_service::service_manager::ServiceManagerAccess;
     use windows_sys::Win32::Foundation::ERROR_SERVICE_DOES_NOT_EXIST;
 
     let manager_access = ServiceManagerAccess::CONNECT;

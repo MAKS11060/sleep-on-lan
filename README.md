@@ -15,9 +15,9 @@
 
 1. Install service
 ```ps
-cargo run --bin service i
+cargo run --bin service install
 # or remove
-cargo run --bin service r
+cargo run --bin service uninstall
 ```
 
 ## Todo:

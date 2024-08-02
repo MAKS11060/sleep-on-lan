@@ -1,23 +1,28 @@
-use anyhow::Ok;
-use mac_address::{MacAddress, MacAddressIterator};
-
 use std::ffi::OsString;
 use std::sync::Arc;
 use std::time::Instant;
 
+use anyhow::Ok;
+use mac_address::MacAddress;
+use mac_address::MacAddressIterator;
 use tokio::net::UdpSocket;
-use tokio::sync::{Mutex, Notify};
+use tokio::sync::Mutex;
+use tokio::sync::Notify;
 use tokio::task::JoinHandle;
-use tokio::time::{sleep, Duration};
-
-use windows_service::service::{
-    ServiceControl, ServiceControlAccept, ServiceExitCode, ServiceState, ServiceStatus, ServiceType,
-};
-use windows_service::service_control_handler::{self, ServiceControlHandlerResult};
-use windows_service::{define_windows_service, service_dispatcher};
-
+use tokio::time::sleep;
+use tokio::time::Duration;
 #[cfg(not(debug_assertions))]
 use windows::Win32::System::Power::SetSuspendState;
+use windows_service::define_windows_service;
+use windows_service::service::ServiceControl;
+use windows_service::service::ServiceControlAccept;
+use windows_service::service::ServiceExitCode;
+use windows_service::service::ServiceState;
+use windows_service::service::ServiceStatus;
+use windows_service::service::ServiceType;
+use windows_service::service_control_handler::ServiceControlHandlerResult;
+use windows_service::service_control_handler::{self};
+use windows_service::service_dispatcher;
 
 const SERVICE_NAME: &str = "sleep-on-lan";
 

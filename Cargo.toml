@@ -1,7 +1,15 @@
 [package]
 name = "sleep-on-lan"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
+
+[[bin]]
+name = "sleep-on-lan"
+path = "./src/main.rs"
+
+[[bin]]
+name = "service"
+path = "./src/service/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -20,10 +28,8 @@ windows = { version = "0.57.0", features = ["Win32_System_Power"] }
 windows-service = "0.7.0"
 windows-sys = "0.52.0"
 
-[[bin]]
-name = "sleep-on-lan"
-path = "./src/main.rs"
+[profile.release] # https://github.com/johnthagen/min-sized-rust
+panic = "abort"
+lto = true
 
-[[bin]]
-name = "service"
-path = "./src/service/main.rs"
+[package]
